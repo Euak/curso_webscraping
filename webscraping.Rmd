@@ -199,3 +199,47 @@ Fazendo isso em um título qualquer, verificamos que o título se encontra conti
 
 Desse modo, temos um caminho para pegar os nodes de programas de TV: `//div[@class='product_wrap']`. Lembrando que `[@class='product_wrap']` determina que apenas nodes com o atributo `class` com o valor igual a 'product_wrap' serão capturados.
 
+Por enquanto, vamos trabalhar apenas com esse caminho e ao longo da atividade vamos elaborar outros caminhos para obter cada informação.
+
+### Segundo Passo - Obter os nodes
+
+Para essa atividade vamos usar dois pacotes:
+```{r}
+library("tidyverse")
+library("rvest")
+```
+
+Como fizemos no tutorial anterior, vamos acessar a página. Porém, desta vez, usaremos o `rvest` para isso. Vamos armazenar a o endereço da página em uma váriavel:
+
+```{r}
+url <- "https://www.metacritic.com/browse/tv/score/metascore/all/filtered?view=condensed&sort=desc"
+```
+
+Para obter a página pelo `rvest`, usamos a função `read_html()`:
+
+```{r}
+pagina <- read_html(url)
+```
+
+No `rvest`, obtemos os nodes pela função `html_nodes()`:
+
+```{r}
+nodes_shows <- html_nodes(pagina, xpath = "//div[@class='product_wrap']")
+```
+NOTE que usamos o parâmetro `xpath` para especificar o caminho dos nodes que queremos. Para essa função, também existe o parâmetro `css` que é uma alternativa para o `xpath`.
+
+Assim, se executarmos os códigos anteriores obteríamos uma lista com todos os nodes de programas de TV. Mas não é isso que queremos. Então precisamos ver a estrutura mais uma vez e verificar como esta estruturados esses nodes para obter cada informação.
+
+### Passo 3 - Obtendo os demais caminhos
+
+Vamos primeiro obter um caminho para extrair os títulos. Voltando na ferramenta "Inspecionar Elemento" do navegador, podemos verificar que o título está contido dentro de uma tag `<a>`, que esta, por sua vez, está contida em uma tag `<div class="basic_stat product_title">`. Podemos, então, elaborar o seguinte caminho a partir do node que capturamos: `//div[@class='basic_stat product_title']/a`. Lembre-se que estamos trabalhando a partir do node `<div class="product_wrap">`. O código fica assim:
+
+```{r}
+nodes_link <- html_nodes(nodes_shows, xpath = "//div[@class='basic_stat product_title']/a") 
+```
+NOTE que passamos a variável `nodes_shows` que criamos anteriormente como parâmetro. Nessa nova variável podemos obter tanto o título quanto o link do programa de TV.
+
+
+
+
+
