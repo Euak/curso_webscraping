@@ -1,0 +1,8 @@
+Atividade 3
+
+Objetivo: Condensar apredizagem?
+Exercício final: Construir um banco de dados de notícias?
+
+Aprendizagem
+
+ - Funções do rvest: rvest::html_node() e rvest::html_text()

@@ -1,0 +1,223 @@
+---
+title: "Web Scraping - APIs"
+author: "Kaue Oliveira Almeida"
+date: "March 29, 2019"
+output: html_document
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE, echo = F}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+## O que é Web Scraping?
+
+Web Scraping, ou em português “Raspagem de dados”, é o processo de extrair, organizar e armazenar conjuntos de dados da web. Esse processo pode, e geralmente é, feito de forma automatizada, de modo que um programa de computador executa os passos necessários para a realização desse processo.
+Com o Web Scraping automatizado, podemos obter dados que estão disponíveis na web de maneira bem mais simplifica e rápida do que faríamos manualmente.
+
+## Distinção entre Web Scraping e Web Crawling
+
+Existe também outro termo parecido e que realiza uma função que pode estar inserida no processo de Web Scrapping, porém, como veremos, não é a mesma coisa! O Web Crawling, em português chamado de “Rastreador web”, é o processo de “varrer” determinado recurso web, como um site, em que um dos seus objetivos pode ser a extração das informações, mas também pode ser a indexação daquele recurso.
+Os programas que fazem esse processo de varredura são chamados de Web Crawlers.
+
+## Técnicas de Web Scraping
+
+O Web Scraping pode ser feito de diversas maneiras, algumas delas são: 
+
+* Copiar e colar (manual)
+* Parseamento do DOM
+* Requisições HTTP
+* Extração pela notação de semântica
+* Uso de expressões regulares e captura de textos
+* Softwares especializados
+    
+## Como fazemos isso no R?
+
+No R, um dos jeitos que fazemos Web Scraping é utilizando os pacotes `httr` e `rvest`.
+O `httr` é, de forma bem simplificada, um pacote feito para manusear  requisições HTTP. Veremos mais adiante o que isso significa quando comentarmos sobre o funcionamento da Web. 
+Já o `rvest` é um pacote que torna a vida de um "colhedor" de dados bem mais fácil. Por meio dele podemos fazer requisições e extrair os dados das respostas usando xPath, seleção de elementos DOM e através de outros mais métodos.
+
+## Como acessamos dados na Web
+
+Para extrairmos  informações de uma página, obviamente, precisamos acessá-la de algum modo. Ao usarmos um navegador de internet, como o Google Chrome ou o Firefox, simplesmente usamos a barra de endereços no topo do programa. Quando apertamos enter, o navegador realiza operações "por baixo dos panos" solicitando dados para o servidor daquele site. Este servidor, por sua vez, irá processar nossa solicitação e retornar para o nosso navegador os dados de acordo com o processamento. Esse processo, como podem imaginar, acontece inúmeras vezes enquanto fazemos uma navegação na internet. E para fazer Web Scraping não precisamos dominar tudo que acontece nesse processo, porém é necessário entender ao menos o básico de sua estrutura. Assim, podemos definir como requisição (request) o processo de solicitar dados para um servidor, e resposta (response) o processo de recebimento de dados.
+
+## Mãos à obra
+Temos uma missão nesta aula, descobrir qual país ouve, em média, músicas mais positivas e alegres no Spotify.
+Para isso, vamos usar a API que o Spotify fornece para obtenção dos dados de sua plataforma.
+
+## Agora, pausa para explicar o que são APIs
+Do termo em inglês "Application Programming Interface", as APIs fornecem um jeito em que podemos fazer nosso programa se comunicar com outros programas. Em nosso caso, nosso código em R usará a API do Spotify para acessar algumas informações da plataforma, como quais são as músicas mais tocadas no Brasil.
+
+## Voltando ao nosso problema
+Quando trabalhamos com uma API, a primeira coisa que devemos fazer é estudar sua estrutura. As APIs sempre devem possuir uma documentação descrevendo sua estrutura para que outros programadores possam consumi-la, tendo em vista que esse é o objetivo de uma API. A documentação da API do Spotify que iremos utilizar está disponível em https://developer.spotify.com/documentation/web-api/.
+
+## Estruturando o problema
+Analisando nosso problema e a documentação da API, podemos estruturar nosso problema nos seguintes passos:
+
+* Pegar as IDs das playlists que queremos
+* Criar uma tabela com os IDs das músicas que pegamos de cada playlist, sendo que cada observação (música) deverá constar a playlist em que ela está contida
+* Pegar as características de cada música, apontando o nível de positividade da respectiva música
+* Criar uma tabela a partir da junção das tabelas de músicas das playlists com a tabela das características das músicas
+* Criar um gráfico mostrando a média de positividade para cada playlist
+ 
+## Codificando
+Antes de tudo, certifique-se de carregar os pacotes necessários:
+```{r, message=FALSE}
+library(tidyverse)
+library(httr)
+library(jsonlite)
+```
+
+Para nossa missão, vamos pegar os países: Costa Rica, Brasil, EUA, Austrália, Nova Zelândia, Reino Unido, França, Alemanha, África do Sul, Japão, Taiwan e Índia Além disso, também vamos pegar a playlist Global.
+Crie um vetor com os IDs dessas regiões como no código abaixo:
+```{r}
+playlists_id <- c("37i9dQZEVXbMDoHDwVN2tF",
+                  "37i9dQZEVXbMZAjGMynsQX",
+                  "37i9dQZEVXbMXbN3EUUhlg",
+                  "37i9dQZEVXbLRQDuF5jeBp",
+                  "37i9dQZEVXbJPcfkRz0wJ0",
+                  "37i9dQZEVXbM8SIrkERIYl",
+                  "37i9dQZEVXbLnolsZ8PSNw",
+                  "37i9dQZEVXbIPWwFssbupI",
+                  "37i9dQZEVXbJiZcmkrIHGU",
+                  "37i9dQZEVXbMH2jvi6jvjk",
+                  "37i9dQZEVXbKXQ4mDTEBXq",
+                  "37i9dQZEVXbMnZEatlMSiu",
+                  "37i9dQZEVXbLZ52XmnySJg")
+```
+Agora crie uma tabela com os IDs e nomes que elas representam:
+```{r}
+playlists_country <- c("Global",
+                       "Costa Rica",
+                       "Brasil",
+                       "EUA",
+                       "Austrália",
+                       "Nova Zelândia",
+                       "Reino Unido",
+                       "França",
+                       "Alemanha",
+                       "Africa do Sul",
+                       "Japão",
+                       "Taiwan",
+                       "Índia")
+
+playlists <- data.frame(id = playlists_id, country = playlists_country, stringsAsFactors = FALSE)
+```
+
+Com essa tabela já temos as informações que precisamos para pegar as músicas mais tocadas nessas regiões no Spotify. Porém, de acordo com a documentação da API, precisamos de um token - uma chave de segurança - para fazer as requisições. Criamos o token seguindo a documentação e armazenamos em uma variável, como no código abaixo:
+```{r}
+token <- "Bearer BQDewZgkA4k_DOGhJBBAzHSFp33itKL-pG-H85HQeGIamMqiHteheqrbAZoFCW4WLGUP5hHIiAZm0ialF2M"
+```
+
+Agora sim podemos fazer requisições! As informações que temos que pegar primeiro são os IDs das músicas dessas playlists.
+
+## Método GET Vs. Método POST
+Os dois métodos mais utilizados para fazer requisições HTTP são o método GET e o método POST. A principal diferença entre os dois é a visibilidade dos dados que são enviados. Assim, no método GET, os parâmetros, chamados de query (consulta), são enviados na própria URL. Já no método POST, os dados são enviados no corpo da requisição, assim não são visíveis para o usuário. Nesta aula só iremos usar o método GET.
+
+## Usando o `httr`
+No pacote `httr` fazemos uma requisição GET pela função.... `GET()`! Seus principais parâmetros são a URL ou o Endpoint (endereço de acesso de uma API) e o `config` que recebe uma lista de configurações adicionais como a autenticação e cabeçalhos adicionais. Assim, podemos criar nossa requisição, ainda de forma crua, desta forma para pegarmos as músicas de uma playlist:
+```{r}
+response_tracks <- GET('https://api.spotify.com/v1/playlists/37i9dQZEVXbMDoHDwVN2tF/tracks')
+```
+Note que ainda precisamos inseir o token para que o acesso aos recursos da API seja permitido. Fazemos isso adicionando um cabeçalho de autorização
+tendo como valor o token que criamos anteriormente, deste modo:
+```{r}
+response_tracks <- GET('https://api.spotify.com/v1/playlists/37i9dQZEVXbMDoHDwVN2tF/tracks', config = add_headers(Authorization = token))
+```
+Não se esqueça que a função `GET()` é escrita em maiúsculo
+
+Essa função irá retornar a resposta do servidor em forma de lista. Essa resposta irá conter várias informações, porém, agora só estamos interessados nos dados das músicas, estes se encontram dentro do elemento content. Entretanto, o content está em um formato estranho para nós. Para resolvermos isso precisamos convertê-lo em algo que possamos trabalhar, e é nessa hora que a função `content` do httr entra em cena. No código a seguir convertemos ou "parseamos" o conteúdo da resposta em lista:
+```{r}
+response_tracks_parsed <- content(response_tracks, as="text") %>% 
+    fromJSON()
+```
+NOTE que temos que usar uma função secundária `fromJSON()` que irá converter o conteúdo a partir da semântica JSON (Notação de objeto Javascript).
+
+Agora temos uma lista com o conteúdo da resposta, porém não precisamos de tudo isto. Vamos pegar só o que está contido no elemento "track", que por sua vez está contido dentro do elemento "items"
+```{r}
+tracks_info <- response_tracks_parsed[['items']]$track
+```
+
+Vamos agora atribuir algumas dessas informações que pegamos para uma nova tabela com o nome da playlist assim:
+```{r}
+dados_tracks <- data.frame()
+dados_tracks <- rbind(dados_tracks, data.frame(id = tracks_info$id, name = tracks_info$name, playlist = 'Global', stringsAsFactors = FALSE))
+
+```
+
+Pronto! Com esse código conseguimos recuperar as informações das músicas para uma playlist. Mas eis o problema: temos que fazer isso para mais 12 regiões! Uma forma de resolver isso seria copiar o código que fizemos por 12 vezes trocando apenas o ID e o nome da playlist. Porém, em programação, a repetição de blocos de códigos indica que a codificação está ruim, e se você copia um mesmo bloco de código 12 vezes, significa que está muito ruim! A solução deste problema está em usar o FOR (um laço de repetição) que irá iterar sobre o vetor que criamos de playlists. Dessa forma, apenas um bloco de código irá executar 13 vezes - que é o número de elementos em nosso vetor - com as IDs contidas no vetor. O código fica assim:
+```{r}
+dados_tracks <- data.frame()
+tracks_info <- data.frame()
+
+for (i in 1:nrow(playlists)) {
+  response_tracks <- GET( paste('https://api.spotify.com/v1/playlists/', '/tracks', sep = playlists$id[i]), add_headers(Authorization = token))
+  response_tracks_parsed <- content(response_tracks, as="text") %>% 
+    fromJSON()
+  
+  tracks_info <- response_tracks_parsed[['items']]$track
+  
+  dados_tracks <- rbind(dados_tracks, data.frame(id = tracks_info$id, name = tracks_info$name, playlist = playlists$country[i], stringsAsFactors = FALSE))
+}
+```
+Tome um tempo para analisar o código acima.
+
+* Primeiro, NOTE que criamos dois data frames (um para todas as playlists e um para a playlist atual) antes do laço para que não se crie um novo a cada iteração. 
+* Segundo, NOTE que o laço irá iterar de 1 até `nrow(playlists)` que é o código para retornar o número de elementos do nosso vetor `playlists`.
+* Terceiro NOTE que para modificarmos o ID da playlist na URL da requisição usamos a função `paste()`, de modo que seja inserido `playlists$id[i]`, ou seja, o ID da playlist contida na posição que está sendo iterada entre as strings 'https://api.spotify.com/v1/playlists/' e '/tracks'. Assim, a cada iteração a URL de requisição irá mudar. Por exemplo, quando o iterador `i` for 1, a URL será 'https://api.spotify.com/v1/playlists/37i9dQZEVXbMDoHDwVN2tF/tracks' e quando o iterador `i` for 2 a URL será 'https://api.spotify.com/v1/playlists/37i9dQZEVXbMZAjGMynsQX/tracks'. Aplicamos a mesma lógica para a variável `playlist` de nossa nova tabela, porém usando a coluna com os nomes dos países.
+
+Nesse momento, só precisamos pegar a positividade, que corresponde a característica "valence", de cada música para fazer nossa análise. Para prepararmos nossa requisição, precisamos criar strings que contenham no máximo 50 IDs de músicas separadas por vírgula. Assim, podemos pegar várias análises de uma vez. Segue o código:
+```{r}
+list_tracks_ids <- split(dados_tracks$id, ceiling(seq_along(dados_tracks$id)/50))
+```
+
+Assim obtemos uma lista com os IDs para as requisições. Temos agora que iterar essa lista enviando os IDs para o endpoint `audio-features` para obter as análises de cada música. Utilizaremos a mesma estrutura da iteração anterior. Temos, porém, que passar os IDs das músicas separadas por vírgula. Podemos combinar um vetor de várias strings em uma única string usando também a função `paste()`, porém, desta vez, vamos usar o parâmetro `collapse` para definir a string que vai colar todos os elementos, e no nosso caso é a vírgula. O código fica assim para o vetor na posição 1:
+```{r}
+url_tracks_ids <- paste(list_tracks_ids[[1]], collapse = ',')
+```
+
+Agora precisamos aplicar a mesma estrutura de laço anterior para essas requisições. Colocando a lógica acima dentro do laço, o código fica assim:
+```{r}
+dados_analysis <- data.frame()
+for (i in 1:length(list_tracks_ids)) {
+  url_tracks_ids <- paste(list_tracks_ids[[i]], collapse = ',')
+  response_track_feature <- GET('https://api.spotify.com/v1/audio-features', query = list(ids = url_tracks_ids), add_headers(Authorization = token))
+  track_feature_full <- content(response_track_feature, as="text") %>% 
+    fromJSON()
+  
+  track_feature_info <- track_feature_full[['audio_features']]
+  
+  dados_analysis <- rbind(dados_analysis, track_feature_info)
+}
+```
+NOTE desta vez passamos os parâmetros da consulta (query) como um parâmetro da função `GET()`, o parâmetro `query`. NOTE também que os dados de interesse dessa vez estão contidos dentro do elemento "audio_features". Por isso é importante verificarmos pela documentação a estrutura da resposta a ser obtida para cada Endpoint.
+
+Estamos quase acabando, temos todas as informações que precisamos para a nossa análise. Porém, falta organizarmos os dados.
+
+Primeiro, fazemos a junção da tabela de músicas com a tabela das características das músicas:
+```{r}
+dados <- inner_join(dados_analysis, dados_tracks, by = "id")
+```
+
+Depois, excluímos os dados duplicados. Vocês lembram o código:
+```{r}
+dados <- dados %>% 
+  distinct(name, playlist, .keep_all = T)
+```
+NOTE que checamos a singularidade pelos campos "name" e "playlist". Também usamos `keep_all = T` para manter os demais campos.
+
+E por último, agrupamos as músicas pelas regiões:
+```{r}
+dados <- group_by(dados, playlist)
+```
+
+Finalmente, podemos summerizar os dados a fim de obter a média de valence por playlist e passar o resultado para montar nosso gráfico. O código fica assim:
+```{r results="hide", fig.keep = 'none'}
+summarise(dados, valence = mean(valence)) %>% 
+  ggplot(aes(x = playlist, y = valence)) +
+  geom_col()
+```
+
+## Desafio da Rainha
+![403 Proibido](http://tsdn.tecnospeed.com.br/files/render/a/wI96tVUP6cE/m/2Aal0HUq8WePPskJ0zZonfGT8KWNuiPJiSFix0uWtae8mWcSRcvJG4IsvJ9x_OvHVKRVfORBBUI)

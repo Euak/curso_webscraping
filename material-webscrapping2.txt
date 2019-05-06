@@ -1,0 +1,18 @@
+Atividade 2
+- Objetivo: Capturar informações de página HTML usando a estrutura do código HTML da página
+- Exercício final: Obter um dataframe com títulos de notícias e seus respectivos links do portal da ALESP
+
+Aprendizagem
+ - Estrutura XML
+ - Comparação simples com HTML
+ - Notação de busca em XML, xPath (xPath, apenas mostra o nome depois de um tempo)
+ - Loop For
+ - Programação funcional (bem de leve, so o map)
+ - Concatenação de string e dataframes
+
+? Ou “todas as ‘tags’ filhas de qualquer ‘tag’ ‘cargo’” (usa-se um asterisco para indicar ‘todas’): e as descendentes das descendentes?
+
+
+*url <- "http://www.al.sp.gov.br/alesp/busca/?q=merenda&page=2" - DEVE SER https://www.al.sp.gov.br/alesp/noticias/?inicio=20&fim=40&textoCodificado=merenda&tituloCodificado=&resumoCodificado=&autorCodificado=&texto=merenda&midia=N&autoria=&data=&dataFim=&titulo=&resumo=&autor=
+
+- programação funcional (map)

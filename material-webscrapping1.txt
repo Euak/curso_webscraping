@@ -1,0 +1,50 @@
+Atividade 1
+- Capturar informações de tabelas em páginas WEB/HTML 
+- Exercício final: Criar um dataframe com o título de preposições e seus autores da ALESP através da pesquisa de seu portal.
+Usa-se/Aprende-se:
+ - Instalação de pacotes
+ - WEB - Método GET
+ - Loop FOR
+ - Leitura de página WEB - não chega a entrar em código html
+ - Estrutura de dados: matrix, vetor, LISTA
+ - Indexação
+- Sugestão: limpar a tabela (remover linhas e colunas sem conteudo) ?
+
+
+
+- instalação dos pacotes
+
+- Pesquisa ALESP | 
+ - Parâmetros
+direction=inicio
+lastPage=0
+currentPage=0
+act=detalhe
+idDocumento=
+rowsPerPage=20
+currentPageDetalhe=1
+tpDocumento=
+method=search
+text=merenda
+natureId=
+legislativeNumber=
+legislativeYear=
+natureIdMainDoc=
+anoDeExercicio=
+strInitialDate=
+strFinalDate=
+author=
+supporter=
+politicalPartyId=
+tipoDocumento=
+
+ páginas com 10 observações em cada uma | 20* observações
+
+ - Link atualizado "https://www.al.sp.gov.br/alesp/pesquisa-proposicoes/?direction=acima&lastPage=44&currentPage=1&act=detalhe&idDocumento=&rowsPerPage=20&currentPageDetalhe=1&tpDocumento=&method=search&text=merenda&natureId=&legislativeNumber=&legislativeYear=&natureIdMainDoc=&anoDeExercicio=&strInitialDate=&strFinalDate=&author=&supporter=&politicalPartyId=&tipoDocumento="
+
+- loop for será ensinado antes?
+- str_replace
+
+- será ensinado lista antes?
+
+*user FILL = TRUE em rvest::html_table

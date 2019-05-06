@@ -1,0 +1,43 @@
+Web Scrapping
+ Aula 1 - httr
+ - O que é, pra que e por quê fazem Web Scraping?
+ - Apresentação dos Pacotes
+ - Funcionamento básico da Web, protocolo HTTP e métodos GET e POST
+ - O que são APIs?
+ - Apresentação do Spotify Web API
+ - Exercício em conjunto usando httr e o Spotify Web API
+
+ Aula 2 - rvest
+ - Mão na massa (Proposta do exercícío 1 da ALESP)
+	 - Mostrar o funcionamento da pesquisa (link e parâmetros)
+	 - Iteração para as páginas (Loop FOR)
+	 - Manipulação de Strings
+	 - Leitura de tabela
+	 - Lista e Data Frames (indexação)
+	 - Manipulação de Data Flames (bind_rows)
+ - XML(?) / HTML
+ - xPath
+ - xPath no exercício anterior
+ - Mão na massa (Proposta do exercícío 2)
+	- Extrair o conteúdo pelo xPath (xml_text(), xml_attr())
+	- Loop FOR
+	- Linguagem funcional (map)
+	- Manipulação de strings para trabalho com as URLS (paste())
+ - Mais funções rvest (html_node(), html_attr())
+ - Download de arquivos (download.file())
+ - Mão na massa (Proposta do exercícío 2)
+	- Loop pelas páginas
+	- Extrair o título, datahora e texto das noticias e criar um dt_framfe com isso
+
+
+Esboço de exercício do Spotify
+ - Proposta: Verificar se há uma audio feature (danceability, energy, ...) que tem uma correlação com a popularidade para um artista específico (Beyoncé, no caso).
+
+Etapas:
+ - Pegar os ids de todos os albuns da B (https://api.spotify.com/v1/artists/6vWDO969PvNqNYHIOW5v0m/albums/?include_groups=album&country=US) e armazenar em um vetor
+ - Pegar os ids das tracks pelos ids dos albuns e armazenar em um data frame
+ - Criar um vetor de strings com os ids das tracks separadas por virgula. Cada vetor não pode ultrapassar mais de 50 ids.
+ - Pegar a popularidade de todas as tracks pelo vetor de ids criado e armazenar em um data frame com o id, nome e popularidade de cada track
+ - Pegar as informações de audios_features das tracks pelo vetor de ids criado e armazenar em um data frame
+ - Fazer a junção das tabelas de popularidade e audio features
+ - Elaborar graficos para cada audio feature sendo, x = audio feature e y = popularity (tem que pensar em uma visualização melhor)
