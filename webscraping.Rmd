@@ -237,9 +237,16 @@ Vamos primeiro obter um caminho para extrair os títulos. Voltando na ferramenta
 ```{r}
 nodes_link <- html_nodes(nodes_shows, xpath = "//div[@class='basic_stat product_title']/a") 
 ```
-NOTE que passamos a variável `nodes_shows` que criamos anteriormente como parâmetro. Nessa nova variável podemos obter tanto o título quanto o link do programa de TV.
+NOTE que passamos a variável `nodes_shows` que criamos anteriormente como parâmetro. Nessa nova variável, podemos obter tanto o título quanto o link do programa de TV.
 
+Vamos agora obter o caminho para extrair o Metascore dos programas de TV. O Metascore está ao lado esquerdo do título. Inspecionando esse elemento vemos que ele está contido em uma tag `<div class="metascore_w small season positive">`, porém se você verificar outros títulos nas últimas páginas, verá que nos programas de TV que apresentam outra cor, a classe "positive" é substituída por "mixed" ou "negative". Tendo isso em mente, vemos que esse elemento, por sua vez, está contido dentro da tag `<div class="basic_stat product_score brief_metascore">`. Assim, assumindo que existe apenas uma tag `div` contida na tag `<div class="basic_stat product_score brief_metascore">`, o caminho fica assim: `/div[@class='basic_stat product_score brief_metascore']/div`. E nosso código fica assim:
+```{r}
+nodes_metascore <- html_nodes(nodes_shows, xpath = "//div[@class='basic_stat product_score brief_metascore']/div") 
+```
 
-
+Finalmente, o único caminho que devemos elaborar corresponde ao User score. Como podemos perceber, a nota que está a seguir do texto "User:" indica o User score. Inspecionando esse elemento, vemos que a informação desta vez está contida dentro de uma tag `<span>`. Porém, como no caso do Metascore, as classes variam de acordo com a nota. Desse modo, ela pode se apresentar assim: `<span class="data textscore textscore_favorable">`, mas também pode se apresentar deste modo: `<span class="data textscore textscore_unfavorable">`. Assim, precisamos de um caminho que pegue todas as tags que tenham pelo menos a class `textscore`, que é comum a todas as notas. Tendo isso em mente, vemos também que essa tag está contida dentro de várias outras tags. Uma opção para elaborar o caminho é usar a `div` que está no mesmo nível da que usamos nos caminhos anteriores. Nesse caso, a tag é a `<div class="basic_stat condensed_stats">`. Desse modo, nosso código fica assim:
+```{r}
+nodes_userscore <- html_nodes(nodes_shows, xpath = "//div[@class='basic_stat condensed_stats']//span[contains(@class,'textscore')]") 
+```
 
 
